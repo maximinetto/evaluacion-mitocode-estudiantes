@@ -33,10 +33,12 @@ public class Estudiante {
 
     }
     
-    public static Estudiante builder(String nombres, String apellidos) {
+    public static Estudiante builder(String nombres, String apellidos, String dni) {
         estudiante = new Estudiante()
           .setNombres(nombres)
-          .setApellidos(apellidos);
+          .setApellidos(apellidos)
+          .setDni(dni);
+        
 	return estudiante;
     }
 

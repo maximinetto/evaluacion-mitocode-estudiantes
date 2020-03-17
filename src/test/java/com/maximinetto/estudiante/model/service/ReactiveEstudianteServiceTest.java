@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.ReactiveMongoOperations;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -50,7 +49,7 @@ public class ReactiveEstudianteServiceTest {
     @Test
     public void testGuardarEstudianteDebeTenerElMismoDni() {
 	final String dniExpected = "12381232";
-	Estudiante estudiante = Estudiante.builder("Maximiliano", "Minetto").setDni(dniExpected);
+	Estudiante estudiante = Estudiante.builder("Maximiliano", "Minetto", dniExpected);
 
 	Estudiante estudianteActual = service.save(estudiante).block();
 
@@ -61,7 +60,7 @@ public class ReactiveEstudianteServiceTest {
     public void testActualizarEstudianteDebeCambiarNombre() {
 	final String nombresExpected = "Maximilian Gabriel";
 
-	Estudiante estudiante = Estudiante.builder("Maximiliano", "Minetto").setDni("2319233");
+	Estudiante estudiante = Estudiante.builder("Maximiliano", "Minetto", "2319233");
 
 	Estudiante estudianteActual = service.save(estudiante)
 		.doOnNext(e -> service.save(e.setNombres(nombresExpected))).block();
@@ -80,15 +79,15 @@ public class ReactiveEstudianteServiceTest {
     }
 
     private void assertListStudentsHas4Elements() {
-	Estudiante estudiante1 = Estudiante.builder("Maximiliano", "Minetto").setDni("2319233").setEdad(25d);
+	Estudiante estudiante1 = Estudiante.builder("Maximiliano", "Minetto", "2319233").setEdad(25d);
 
-	Estudiante estudiante2 = Estudiante.builder("Felipe Andrés", "Gonzales Barreto").setDni("23311311")
+	Estudiante estudiante2 = Estudiante.builder("Felipe Andrés", "Gonzales Barreto", "23311311")
 		.setEdad(22d);
 
-	Estudiante estudiante3 = Estudiante.builder("Carolina Lucía", "Fernández Izauralde").setDni("42321232")
+	Estudiante estudiante3 = Estudiante.builder("Carolina Lucía", "Fernández Izauralde", "42321232")
 		.setEdad(27d);
 
-	Estudiante estudiante4 = Estudiante.builder("Agustina Sofía", "López Bermudez").setDni("36321926").setEdad(21d);
+	Estudiante estudiante4 = Estudiante.builder("Agustina Sofía", "López Bermudez", "36321926").setEdad(21d);
 
 	List<Estudiante> estudiantes = Mono.zip(service.save(estudiante1), service.save(estudiante2),
 		service.save(estudiante3), service.save(estudiante4)).then(service.getAll().collectList()).block();
