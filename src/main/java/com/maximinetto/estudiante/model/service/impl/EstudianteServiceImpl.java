@@ -30,14 +30,25 @@ public class EstudianteServiceImpl extends GenericServiceImpl<Estudiante, String
 
     @Override
     public Mono<Estudiante> create(Estudiante estudiante) {
-	return repository.findByDni(estudiante.getDni()).switchIfEmpty(save(estudiante))
-		.flatMap(e -> Mono.error(new StudentAlreadyExistsException("El dni del estudiante ya existe")));
-
+	return repository.findStudentsByDni(estudiante.getDni()).hasElements().flatMap(hasElements -> {
+	    if (hasElements) {
+		throw new StudentAlreadyExistsException(
+			String.format("Ya existe un estudiante con dni %s en el sistema.", estudiante.getDni()));
+	    }
+	    else {
+		return this.save(estudiante);
+	    }
+	});
     }
 
     @Override
     public ReactiveCrudRepository<Estudiante, String> getRepository() {
 	return repository;
+    }
+
+    @Override
+    public Flux<Estudiante> getStudentByDni(String dni) {
+	return repository.findStudentsByDni(dni);
     }
 
 }

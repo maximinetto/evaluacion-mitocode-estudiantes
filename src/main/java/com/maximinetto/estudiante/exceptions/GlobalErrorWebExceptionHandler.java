@@ -68,6 +68,7 @@ public class GlobalErrorWebExceptionHandler extends AbstractErrorWebExceptionHan
 	mapException.put("statusCode", status);
 	mapException.put("ruta", request.uri());
 	mapException.put("fecha-error", LocalDateTime.now());
+	mapException.put("causa", errorPropertiesMap.get("cause"));
 
 	return mapException;
     }

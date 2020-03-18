@@ -25,8 +25,11 @@ public class CursoServiceImpl extends GenericServiceImpl<Curso, String> implemen
 
     @Override
     public Mono<Curso> create(Curso curso) {
-	return repository.findByNombre(curso.getNombre()).switchIfEmpty(save(curso))
-		.flatMap(c -> Mono.error(new StudentAlreadyExistsException("El nombre del curso ya existe")));
+	return repository.findByNombre(curso.getNombre()).hasElements().flatMap( hasElements -> 
+	    hasElements ?  
+		    	  Mono.error(new StudentAlreadyExistsException("El nombre del curso ya existe"))
+		    	: repository.save(curso)
+	);	
     }
 
 }

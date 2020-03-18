@@ -10,29 +10,30 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import com.maximinetto.estudiante.model.entity.Estudiante;
-import com.maximinetto.estudiante.model.service.EstudianteService;
+import com.maximinetto.estudiante.model.entity.Curso;
+import com.maximinetto.estudiante.model.service.CursoService;
 
 import reactor.core.publisher.Mono;
 
 @Component
-public class EstudianteHandler {
+public class CursoHandler {
+    
     
     @Value("${id.name}")
     private String id;
     
     @Autowired
-    private EstudianteService service;
+    private CursoService service;
     
     public Mono<ServerResponse> listar(ServerRequest request){
 	return ServerResponse.ok()
 		.contentType(MediaType.APPLICATION_STREAM_JSON)
-		.body(service.getAll(), Estudiante.class);
+		.body(service.getAll(), Curso.class);
     }
     
     public Mono<ServerResponse> listarPorId(ServerRequest request){
-	String idEstudiante = request.pathVariable(id);
-	return service.get(idEstudiante)
+	String idCurso = request.pathVariable(id);
+	return service.get(idCurso)
 		.flatMap( e -> ServerResponse.ok()
 			   .contentType(MediaType.APPLICATION_STREAM_JSON)
 			   .body(BodyInserters.fromValue(e))
@@ -42,17 +43,17 @@ public class EstudianteHandler {
     }
     
     public Mono<ServerResponse> registrar(ServerRequest request){
-	Mono<Estudiante> estudianteMono = request.bodyToMono(Estudiante.class);
-	return estudianteMono
+	Mono<Curso> cursoMono = request.bodyToMono(Curso.class);
+	return cursoMono
 		.flatMap(e -> service.create(e)
 			)
-		.flatMap(e -> ServerResponse.created(URI.create(
-				request.uri().toString().concat("/").concat(e.getId()))
-				)
+		.flatMap(e -> ServerResponse.created(URI.create(request.uri().toString()
+					.concat("/")
+					.concat(e.getId())))
 			 .contentType(MediaType.APPLICATION_STREAM_JSON)
 			 .body(BodyInserters.fromValue(e))
 			);
 		
     }
-    
+
 }

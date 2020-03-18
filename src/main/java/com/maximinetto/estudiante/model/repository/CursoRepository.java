@@ -4,9 +4,9 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
 import com.maximinetto.estudiante.model.entity.Curso;
 
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 public interface CursoRepository extends ReactiveCrudRepository<Curso, String>{
  
-    Mono<Curso> findByNombre(String nombre);
+    Flux<Curso> findByNombre(String nombre);
 }

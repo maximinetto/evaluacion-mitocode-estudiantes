@@ -11,5 +11,6 @@ public interface GenericService<T, ID extends Serializable> {
     Mono<Void> delete(ID id);
     Mono<T> get(ID id);
     Flux<T> getAll();
+    Mono<T> create(T entity);
     
 }

@@ -14,7 +14,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.ReactiveMongoOperations;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.maximinetto.estudiante.exceptions.StudentAlreadyExistsException;
 import com.maximinetto.estudiante.model.entity.Estudiante;
+import com.maximinetto.estudiante.model.repository.EstudianteRepository;
 import com.maximinetto.estudiante.model.service.impl.EstudianteServiceImpl;
 
 import reactor.core.publisher.Mono;
@@ -26,6 +28,9 @@ public class ReactiveEstudianteServiceTest {
 
     @Autowired
     EstudianteService service;
+    
+    @Autowired
+    EstudianteRepository repository;
 
     @Autowired
     ReactiveMongoOperations operations;
@@ -67,6 +72,29 @@ public class ReactiveEstudianteServiceTest {
 
 	assertThat(estudianteActual.getNombres()).contains(nombresExpected);
 	assertThat(service.getAll().collectList().block()).hasSize(1);
+    }
+    
+    @Test
+    public void testListarEstudiantesPorDni() {
+	final String expectedDni = "12345678";
+	Estudiante lucia = Estudiante.builder("maria lucía", "Bermudez", expectedDni);
+	service.create(lucia).block();
+	Estudiante estudiante = repository.findStudentsByDni(expectedDni).blockFirst();
+	assertThat(estudiante.getDni()).isEqualTo(expectedDni);
+    }
+    
+    @Test
+    public void testSalvarPorDniEstudianteDebeDarExcepcion() {
+	
+	Estudiante estudiante = Estudiante.builder("maria lucía", "Bermudez", "12345678");
+	service.create(estudiante).block();
+	try {
+	    service.create(estudiante).block();
+	}
+	catch(StudentAlreadyExistsException ex) {
+	    assertThat(ex).hasCauseInstanceOf(StudentAlreadyExistsException.class);
+	}
+	
     }
 
     @Test
