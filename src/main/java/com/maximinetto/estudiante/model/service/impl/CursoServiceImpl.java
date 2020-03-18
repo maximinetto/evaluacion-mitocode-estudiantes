@@ -2,6 +2,7 @@ package com.maximinetto.estudiante.model.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import org.springframework.stereotype.Service;
 
 import com.maximinetto.estudiante.commons.GenericServiceImpl;
 import com.maximinetto.estudiante.exceptions.StudentAlreadyExistsException;
@@ -11,6 +12,7 @@ import com.maximinetto.estudiante.model.service.CursoService;
 
 import reactor.core.publisher.Mono;
 
+@Service
 public class CursoServiceImpl extends GenericServiceImpl<Curso, String> implements CursoService {
 
     @Autowired
