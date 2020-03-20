@@ -17,42 +17,56 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class EstudianteHandler {
-    
+
     @Value("${id.name}")
     private String id;
-    
+
     @Autowired
     private EstudianteService service;
-    
-    public Mono<ServerResponse> listar(ServerRequest request){
-	return ServerResponse.ok()
-		.contentType(MediaType.APPLICATION_STREAM_JSON)
-		.body(service.getAll(), Estudiante.class);
+
+    public Mono<ServerResponse> listar(ServerRequest request) {
+	return ServerResponse.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(service.getAll(),
+		Estudiante.class);
     }
-    
-    public Mono<ServerResponse> listarPorId(ServerRequest request){
+
+    public Mono<ServerResponse> listarPorId(ServerRequest request) {
 	String idEstudiante = request.pathVariable(id);
-	return service.get(idEstudiante)
-		.flatMap( e -> ServerResponse.ok()
-			   .contentType(MediaType.APPLICATION_STREAM_JSON)
-			   .body(BodyInserters.fromValue(e))
-		)
-		.switchIfEmpty(ServerResponse.notFound().build());
-	
+	return service.get(idEstudiante).flatMap(e -> ServerResponse.ok().contentType(MediaType.APPLICATION_STREAM_JSON)
+		.body(BodyInserters.fromValue(e))).switchIfEmpty(ServerResponse.notFound().build());
+
     }
-    
-    public Mono<ServerResponse> registrar(ServerRequest request){
+
+    public Mono<ServerResponse> registrar(ServerRequest request) {
+	Mono<Estudiante> estudianteMono = request.bodyToMono(Estudiante.class);
+	return estudianteMono.flatMap(service::create)
+		.flatMap(e -> 
+		ServerResponse.created(URI.create(request.uri()
+			              .toString()
+			              .concat("/")
+			              .concat(e.getId())))
+			      .contentType(MediaType.APPLICATION_STREAM_JSON)
+			      .body(BodyInserters.fromValue(e))
+	        );
+
+    }
+
+    public Mono<ServerResponse> modificar(ServerRequest request) {
 	Mono<Estudiante> estudianteMono = request.bodyToMono(Estudiante.class);
 	return estudianteMono
-		.flatMap(e -> service.create(e)
-			)
-		.flatMap(e -> ServerResponse.created(URI.create(
-				request.uri().toString().concat("/").concat(e.getId()))
-				)
-			 .contentType(MediaType.APPLICATION_STREAM_JSON)
-			 .body(BodyInserters.fromValue(e))
-			);
-		
+		.flatMap(service::save)
+		.flatMap(est -> ServerResponse.ok()
+		                .contentType(MediaType.APPLICATION_STREAM_JSON)
+		                .body(BodyInserters.fromValue(est))
+		)
+		.switchIfEmpty(ServerResponse.notFound().build());
     }
     
+    public Mono<ServerResponse> eliminar(ServerRequest request) {
+	String idEstudiante = request.pathVariable(id);
+	
+	return service.delete(idEstudiante)
+		      .then(ServerResponse.noContent()
+			                  .build());
+    }
+
 }

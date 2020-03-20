@@ -5,6 +5,7 @@ import javax.validation.constraints.Size;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "estudiantes")
@@ -22,6 +23,7 @@ public class Estudiante {
     @NotEmpty(message = "Se debe especificar los apellidos del estudiante")
     private String apellidos;
 
+    @Indexed(unique = true)
     @NotEmpty(message = "Se debe especificar el dni del estudiante")
     private String dni;
 
