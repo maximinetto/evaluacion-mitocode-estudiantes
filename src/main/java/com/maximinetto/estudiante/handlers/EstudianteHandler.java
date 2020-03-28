@@ -12,6 +12,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.maximinetto.estudiante.model.entity.Estudiante;
 import com.maximinetto.estudiante.model.service.EstudianteService;
+import com.maximinetto.estudiante.validators.RequestValidator;
 
 import reactor.core.publisher.Mono;
 
@@ -20,6 +21,9 @@ public class EstudianteHandler {
 
     @Value("${id.name}")
     private String id;
+    
+    @Autowired
+    private RequestValidator validator;
 
     @Autowired
     private EstudianteService service;
@@ -38,9 +42,10 @@ public class EstudianteHandler {
 
     public Mono<ServerResponse> registrar(ServerRequest request) {
 	Mono<Estudiante> estudianteMono = request.bodyToMono(Estudiante.class);
-	return estudianteMono.flatMap(service::create)
+	return estudianteMono.flatMap(this.validator::validar)
+		.flatMap(service::create)
 		.flatMap(e -> 
-		ServerResponse.created(URI.create(request.uri()
+			ServerResponse.created(URI.create(request.uri()
 			              .toString()
 			              .concat("/")
 			              .concat(e.getId())))
@@ -52,7 +57,7 @@ public class EstudianteHandler {
 
     public Mono<ServerResponse> modificar(ServerRequest request) {
 	Mono<Estudiante> estudianteMono = request.bodyToMono(Estudiante.class);
-	return estudianteMono
+	return estudianteMono.flatMap(this.validator::validar)
 		.flatMap(service::save)
 		.flatMap(est -> ServerResponse.ok()
 		                .contentType(MediaType.APPLICATION_STREAM_JSON)

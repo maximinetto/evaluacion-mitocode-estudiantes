@@ -15,8 +15,8 @@ public class StudentAlreadyExistsException extends GlobalErrorException{
 	super(causa);
     }
 
-    public StudentAlreadyExistsException(String message, String causa, HttpStatus status) {
-	super(message, causa, status);
+    public StudentAlreadyExistsException(String message, String causa) {
+	super(message, causa, HttpStatus.CONFLICT);
     }
     
 }

@@ -1,7 +1,7 @@
 package com.maximinetto.estudiante.model.entity;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
@@ -27,8 +27,7 @@ public class Estudiante {
     @NotEmpty(message = "Se debe especificar el dni del estudiante")
     private String dni;
 
-    @NotEmpty(message = "Se debe especificar la edad del estudiante")
-    @Size(min = 0, message = "La edad debe ser mìnimo de 0")
+    @Min(value = 0, message = "La edad debe ser mìnimo de 0")
     private Double edad;
 
     private Estudiante() {
