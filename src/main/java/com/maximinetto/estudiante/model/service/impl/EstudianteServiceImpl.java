@@ -58,9 +58,13 @@ public class EstudianteServiceImpl extends GenericServiceImpl<Estudiante, String
 
     @Override
     public Mono<Void> delete(String id) {
-	return get(id).flatMap(est -> super.delete(id))
-		      .switchIfEmpty( Mono.error(new ModelNotFoundException("No se puede eliminar el estudiante", 
-			              "El estudiante no existe")));
+	return get(id).switchIfEmpty(Mono.error(
+		new ModelNotFoundException("No se puede eliminar el estudiante", 
+	              "El estudiante no existe")))
+		.flatMap(est -> 
+		super.delete(id));
+	
+	
 
     }
 

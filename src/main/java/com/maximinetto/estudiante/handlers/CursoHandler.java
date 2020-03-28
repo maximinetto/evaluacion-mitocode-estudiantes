@@ -12,6 +12,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.maximinetto.estudiante.model.entity.Curso;
 import com.maximinetto.estudiante.model.service.CursoService;
+import com.maximinetto.estudiante.validators.RequestValidator;
 
 import reactor.core.publisher.Mono;
 
@@ -21,6 +22,9 @@ public class CursoHandler {
     
     @Value("${id.name}")
     private String id;
+    
+    @Autowired
+    private RequestValidator validator;
     
     @Autowired
     private CursoService service;
@@ -44,7 +48,7 @@ public class CursoHandler {
     
     public Mono<ServerResponse> registrar(ServerRequest request){
 	Mono<Curso> cursoMono = request.bodyToMono(Curso.class);
-	return cursoMono
+	return cursoMono.flatMap(this.validator::validar)
 		.flatMap(e -> service.create(e)
 			)
 		.flatMap(e -> ServerResponse.created(URI.create(request.uri().toString()
@@ -54,6 +58,25 @@ public class CursoHandler {
 			 .body(BodyInserters.fromValue(e))
 			);
 		
+    }
+    
+    public Mono<ServerResponse> modificar(ServerRequest request) {
+	Mono<Curso> cursoMono = request.bodyToMono(Curso.class);
+	return cursoMono.flatMap(this.validator::validar)
+		.flatMap(service::save)
+		.flatMap(curso -> ServerResponse.ok()
+		                .contentType(MediaType.APPLICATION_STREAM_JSON)
+		                .body(BodyInserters.fromValue(curso))
+		)
+		.switchIfEmpty(ServerResponse.notFound().build());
+    }
+    
+    public Mono<ServerResponse> eliminar(ServerRequest request) {
+	String idCurso = request.pathVariable(id);
+	
+	return service.delete(idCurso)
+		      .then(ServerResponse.noContent()
+			                  .build());
     }
 
 }
