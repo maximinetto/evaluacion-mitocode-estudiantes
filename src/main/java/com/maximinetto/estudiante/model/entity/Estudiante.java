@@ -28,7 +28,7 @@ public class Estudiante {
     private String dni;
 
     @Min(value = 0, message = "La edad debe ser mìnimo de 0")
-    private Double edad;
+    private double edad;
 
     private Estudiante() {
 
@@ -79,12 +79,16 @@ public class Estudiante {
 	return this;
     }
 
-    public Double getEdad() {
+    public double getEdad() {
 	return edad;
     }
 
     public Estudiante setEdad(Double edad) {
-	this.edad = edad;
+	if(edad == null)
+	    this.edad = 0;
+	else 
+	    this.edad = edad;
+	
 	return this;
     }
 

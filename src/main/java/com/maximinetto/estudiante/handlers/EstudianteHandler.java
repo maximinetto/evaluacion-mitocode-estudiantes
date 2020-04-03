@@ -1,6 +1,8 @@
 package com.maximinetto.estudiante.handlers;
 
 import java.net.URI;
+import java.util.Comparator;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +16,9 @@ import com.maximinetto.estudiante.model.entity.Estudiante;
 import com.maximinetto.estudiante.model.service.EstudianteService;
 import com.maximinetto.estudiante.validators.RequestValidator;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Component
 public class EstudianteHandler {
@@ -29,8 +33,49 @@ public class EstudianteHandler {
     private EstudianteService service;
 
     public Mono<ServerResponse> listar(ServerRequest request) {
-	return ServerResponse.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(service.getAll(),
-		Estudiante.class);
+	
+	
+	Optional<String> optionalParallel = request
+		.queryParam("parallel")
+		.filter(par -> Boolean.parseBoolean(par));
+	
+	Optional<String> optionalSortBy = request
+	    .queryParam("sortBy")
+	    .filter(sortBy -> sortBy.equals("age"));
+
+	Flux<Estudiante> flujoParalelo = service.getAll()
+		    .parallel()
+	            .runOn(Schedulers.elastic())
+	            .ordered(ordenarDescendente());
+		
+	Flux<Estudiante> estudianteFlux = request
+		    .queryParam("sortBy")
+		    .filter(sortBy -> sortBy.equals("age"))
+		    .map(p -> service.getStudentsByAgeDesc())
+	            .orElseGet(() -> service.getAll());
+	
+	Flux<Estudiante> flujoFinal = optionalParallel
+		                 .flatMap(v ->optionalSortBy)
+		                 .map(v -> flujoParalelo )
+		                 .orElse(estudianteFlux);
+	    
+	
+	return ServerResponse.ok()
+		             .contentType(MediaType.APPLICATION_STREAM_JSON)
+		             .body(flujoFinal, Estudiante.class);
+	
+    }
+    
+    public Mono<ServerResponse> listarPorEdadParallelo(ServerRequest request){
+	Flux<Estudiante> estudianteFlux = service.getAll()
+		                                 .parallel()
+		                                 .runOn(Schedulers.elastic())
+		                                 .ordered(ordenarDescendente());
+	
+	return ServerResponse.ok()
+	             .contentType(MediaType.APPLICATION_STREAM_JSON)
+	             .body(estudianteFlux, Estudiante.class);
+	
     }
 
     public Mono<ServerResponse> listarPorId(ServerRequest request) {
@@ -72,6 +117,12 @@ public class EstudianteHandler {
 	return service.delete(idEstudiante)
 		      .then(ServerResponse.noContent()
 			                  .build());
+    }
+    
+    private Comparator<Estudiante> ordenarDescendente(){
+	 return (est1, est2) -> 
+         (int) est2.getEdad() - 
+         (int) est1.getEdad();
     }
 
 }

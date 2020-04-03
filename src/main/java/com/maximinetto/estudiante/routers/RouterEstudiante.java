@@ -23,10 +23,12 @@ public class RouterEstudiante {
     @Bean
     public RouterFunction<ServerResponse> rutasEstudiante(EstudianteHandler handler){
 	return route(GET(baseUri), handler::listar)
+		.andRoute(GET("/estudiantes/paralelo"), handler::listarPorEdadParallelo)
 		.andRoute(GET(uriWithId), handler::listarPorId)
 		.andRoute(POST(baseUri), handler::registrar)
 		.andRoute(PUT(baseUri), handler::modificar)
-		.andRoute(DELETE(uriWithId), handler::eliminar);
+		.andRoute(DELETE(uriWithId), handler::eliminar)
+		;
     }
     
     

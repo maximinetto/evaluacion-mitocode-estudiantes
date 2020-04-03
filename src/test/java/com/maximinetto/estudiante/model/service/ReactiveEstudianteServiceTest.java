@@ -124,7 +124,7 @@ public class ReactiveEstudianteServiceTest {
 
     private void assertAgeIsSorted() {
 	Double[] edades = service.getStudentsByAgeDesc().collectList().block().stream()
-		.map(e -> e.getEdad().doubleValue()).collect(Collectors.toList()).toArray(new Double[0]);
+		.map(e -> e.getEdad()).collect(Collectors.toList()).toArray(new Double[0]);
 	assertThat(edades).isSortedAccordingTo((age1, age2) -> age2.compareTo(age1) );
     }
 
