@@ -65,18 +65,6 @@ public class EstudianteHandler {
 		             .body(flujoFinal, Estudiante.class);
 	
     }
-    
-    public Mono<ServerResponse> listarPorEdadParallelo(ServerRequest request){
-	Flux<Estudiante> estudianteFlux = service.getAll()
-		                                 .parallel()
-		                                 .runOn(Schedulers.elastic())
-		                                 .ordered(ordenarDescendente());
-	
-	return ServerResponse.ok()
-	             .contentType(MediaType.APPLICATION_STREAM_JSON)
-	             .body(estudianteFlux, Estudiante.class);
-	
-    }
 
     public Mono<ServerResponse> listarPorId(ServerRequest request) {
 	String idEstudiante = request.pathVariable(id);
