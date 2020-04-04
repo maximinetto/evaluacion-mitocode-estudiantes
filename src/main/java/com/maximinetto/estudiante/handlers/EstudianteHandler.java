@@ -1,7 +1,6 @@
 package com.maximinetto.estudiante.handlers;
 
 import java.net.URI;
-import java.util.Comparator;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,6 @@ import com.maximinetto.estudiante.validators.RequestValidator;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 @Component
 public class EstudianteHandler {
@@ -43,22 +41,9 @@ public class EstudianteHandler {
 	    .queryParam("sortBy")
 	    .filter(sortBy -> sortBy.equals("age"));
 
-	Flux<Estudiante> flujoParalelo = service.getAll()
-		    .parallel()
-	            .runOn(Schedulers.elastic())
-	            .ordered(ordenarDescendente());
-		
-	Flux<Estudiante> estudianteFlux = request
-		    .queryParam("sortBy")
-		    .filter(sortBy -> sortBy.equals("age"))
-		    .map(p -> service.getStudentsByAgeDesc())
-	            .orElseGet(() -> service.getAll());
 	
-	Flux<Estudiante> flujoFinal = optionalParallel
-		                 .flatMap(v ->optionalSortBy)
-		                 .map(v -> flujoParalelo )
-		                 .orElse(estudianteFlux);
-	    
+	
+	Flux<Estudiante> flujoFinal = service.listarByCriteria(optionalSortBy, optionalParallel);
 	
 	return ServerResponse.ok()
 		             .contentType(MediaType.APPLICATION_STREAM_JSON)
@@ -68,8 +53,15 @@ public class EstudianteHandler {
 
     public Mono<ServerResponse> listarPorId(ServerRequest request) {
 	String idEstudiante = request.pathVariable(id);
-	return service.get(idEstudiante).flatMap(e -> ServerResponse.ok().contentType(MediaType.APPLICATION_STREAM_JSON)
-		.body(BodyInserters.fromValue(e))).switchIfEmpty(ServerResponse.notFound().build());
+	return service.get(idEstudiante)
+		      .flatMap(e -> ServerResponse
+			               .ok()
+			               .contentType(MediaType.APPLICATION_STREAM_JSON)
+		                       .body(BodyInserters.fromValue(e))
+		              )
+		      .switchIfEmpty(ServerResponse
+			               .notFound()
+			               .build());
 
     }
 
@@ -107,10 +99,6 @@ public class EstudianteHandler {
 			                  .build());
     }
     
-    private Comparator<Estudiante> ordenarDescendente(){
-	 return (est1, est2) -> 
-         (int) est2.getEdad() - 
-         (int) est1.getEdad();
-    }
+    
 
 }

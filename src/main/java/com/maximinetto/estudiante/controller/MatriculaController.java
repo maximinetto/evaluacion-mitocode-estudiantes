@@ -2,8 +2,6 @@ package com.maximinetto.estudiante.controller;
 
 import java.net.URI;
 
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.maximinetto.estudiante.model.entity.Matricula;
 import com.maximinetto.estudiante.model.service.MatriculaService;
+import com.maximinetto.estudiante.validators.RequestValidator;
 
 import reactor.core.publisher.Mono;
 
@@ -25,24 +24,27 @@ public class MatriculaController {
     @Autowired
     private MatriculaService service;
     
+    @Autowired
+    private RequestValidator validator;
+    
     @PostMapping
-    public Mono<ResponseEntity<Matricula>> registrar(@Valid @RequestBody Matricula matricula, 
+    public Mono<ResponseEntity<Matricula>> registrar(@RequestBody Matricula matricula, 
 	                                   final ServerHttpRequest request){
-	
-	return service.create(matricula)
-		      .map(m -> ResponseEntity
-			             .created(URI.create(request
-			        	       .getURI()
-			        	       .toString()
-			        	       .concat("/")
-			        	       .concat(m.getId())
-			        	       )
-			        	     )
-			             .contentType(MediaType.APPLICATION_STREAM_JSON)
-			             .body(m)
+	return validator
+		.validar(matricula)
+		.flatMap(service::create)	
+	        .map(m -> ResponseEntity
+	             .created(URI.create(request
+	                                  .getURI()
+	                                  .toString() 
+	                                  .concat("/") 
+	                                  .concat(m.getId())
+	                                )
+                             )
+	             .contentType(MediaType.APPLICATION_STREAM_JSON)
+		     .body(m)
 			            
-		      );
-	
+		);
     }
     
 }

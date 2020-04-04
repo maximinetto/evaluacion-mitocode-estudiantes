@@ -1,5 +1,6 @@
 package com.maximinetto.estudiante.model.service.impl;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import com.maximinetto.estudiante.model.service.EstudianteService;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Service
 public class EstudianteServiceImpl extends GenericServiceImpl<Estudiante, String> implements EstudianteService {
@@ -31,8 +33,28 @@ public class EstudianteServiceImpl extends GenericServiceImpl<Estudiante, String
 
     @Override
     public Flux<Estudiante> getStudentsByAgeDesc() {
-	return repository.findAllByOrderByEdadDesc();
+	return repository.findAllByOrderByEdadDesc()
+		         .doOnNext(e -> System.out.println("Order By db. Estudiante: " + e.getNombres()));
     }
+    
+    @Override
+    public Flux<Estudiante> listarByCriteria(Optional<String> optionalSortBy, Optional<String> optionalParallel){
+	Flux<Estudiante> flujoParalelo = getAll()
+		    .parallel()
+	            .runOn(Schedulers.elastic())
+	            .ordered( (est1, est2) -> (int) est2.getEdad() - (int) est1.getEdad() );
+		
+	Flux<Estudiante> estudianteFlux = optionalSortBy
+		    .map(p -> getStudentsByAgeDesc())
+	            .orElseGet(() -> getAll());
+	
+	return optionalParallel
+                .flatMap(v -> optionalSortBy)
+                .map(v -> flujoParalelo )
+                .orElse(estudianteFlux);
+    }
+    
+
 
     @Override
     public Mono<Estudiante> create(Estudiante estudiante) {
