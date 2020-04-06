@@ -49,17 +49,20 @@ public class GlobalErrorWebExceptionHandler extends AbstractErrorWebExceptionHan
 	
 	final Map<String, Object> mapException = ponerExcepcionesGeneralesEnMap(status, request);
 	
-	switch (status) {
-	    case "500":
-		httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-	    break;
+	HttpStatus statusCode;
 	
-	    default: 
-		httpStatus = HttpStatus.BAD_REQUEST;
+	try {
+	    
+	    statusCode = HttpStatus.valueOf(Integer.valueOf(status));
+	    
+	   
 	}
-
-	return ServerResponse.status(httpStatus).contentType(MediaType.APPLICATION_STREAM_JSON)
-		.body(BodyInserters.fromValue(mapException));
+	catch(Exception e) {
+	    statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+	}
+	
+	 return ServerResponse.status(statusCode).contentType(MediaType.APPLICATION_STREAM_JSON)
+		    .body(BodyInserters.fromValue(mapException));
     }
 
     private Map<String, Object> ponerExcepcionesGeneralesEnMap(String status, ServerRequest request) {

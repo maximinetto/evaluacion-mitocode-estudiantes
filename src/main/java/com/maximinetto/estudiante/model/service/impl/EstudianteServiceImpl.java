@@ -74,8 +74,11 @@ public class EstudianteServiceImpl extends GenericServiceImpl<Estudiante, String
 		             
 		             return Mono.empty();
 		         })
+		         .then(get(estudiante.getId()))
+		         .switchIfEmpty(Mono.error( 
+		        	 new ModelNotFoundException("No se ha encontrado el estudiante", "No existe ese id")))
 		         .then(super.save(estudiante));
-	//super.save(entity);
+	
     }
 
     @Override
