@@ -11,6 +11,8 @@ import org.springframework.security.web.server.context.ServerSecurityContextRepo
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 
+import com.maximinetto.estudiante.exceptions.UserNotAuthorized;
+
 import reactor.core.publisher.Mono;
 
 //Numero6
@@ -38,7 +40,7 @@ public class SecurityContextRepository implements ServerSecurityContextRepositor
 	    
 	    
 	    if (!hasBearer) {
-		return Mono.error(new InterruptedException("No estas autorizado"));
+		return Mono.error(new UserNotAuthorized("No estás autorizado"));
 	    }
 	    
 	    String authToken = authHeader.substring(7); //extrae solo el token de bearear eyy...

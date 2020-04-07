@@ -14,23 +14,24 @@ public class Usuario {
 	private String usuario;
 	private String clave;
 	private Boolean estado;
+	
 	@DBRef
 	private List<Rol> roles;
 
 	public String getId() {
-		return id;
+	  return id;
 	}
 
 	public void setId(String id) {
-		this.id = id;
+ 	  this.id = id;
 	}
 
 	public String getUsuario() {
-		return usuario;
+     	  return usuario;
 	}
 
 	public void setUsuario(String usuario) {
-		this.usuario = usuario;
+	  this.usuario = usuario;
 	}
 
 	public String getClave() {
@@ -38,19 +39,19 @@ public class Usuario {
 	}
 
 	public void setClave(String clave) {
-		this.clave = clave;
+	  this.clave = clave;
 	}
 
 	public Boolean getEstado() {
-		return estado;
+           return estado;
 	}
 
 	public void setEstado(Boolean estado) {
-		this.estado = estado;
+	  this.estado = estado;
 	}
 
 	public List<Rol> getRoles() {
-		return roles;
+	  return roles;
 	}
 
 	public void setRoles(List<Rol> roles) {

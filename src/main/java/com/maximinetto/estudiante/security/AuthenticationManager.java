@@ -8,10 +8,12 @@ import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
 import reactor.core.publisher.Mono;
 
+@Component
 public class AuthenticationManager implements ReactiveAuthenticationManager {
 
     @Autowired
@@ -29,23 +31,29 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
 	    usuario = null;
 	}
 
-	if (usuario != null && jwtUtil.validateToken(token)) {
-	    Claims claims = jwtUtil.getAllClaimsFromToken(token);
-	    
-	    // esta linea extrae del Map[payload] el item "roles" y devuelve el contenido
-	    List<String> rolesMap = claims.get("roles", List.class);
+	if (usuario == null || !jwtUtil.validateToken(token)) {
+	    return Mono.error(new InterruptedException("Token no válido o ha expirado")); 
+	} 
+	
+	Claims claims = jwtUtil.getAllClaimsFromToken(token);
+	
+	
+	// esta linea extrae del Map[payload] el item "roles" y devuelve el contenido
+	List<String> rolesMap = claims.get("roles", List.class);
+	
+	
 
-	    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-		    usuario, 
-		    null, 
-		    rolesMap.stream()
-		            .map(authority -> new SimpleGrantedAuthority(authority))
-		            .collect(Collectors.toList()));
+	List<SimpleGrantedAuthority> authorities = rolesMap.stream()
+                                                           .map(authority -> new SimpleGrantedAuthority(authority))
+                                                           .collect(Collectors.toList());
 	    
-	    return Mono.just(auth);
-	} else {
-	    return Mono.error(new InterruptedException("Token no válido o ha expirado"));
-	}
+	UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+		usuario, 
+		null, 
+		authorities);
+	   
+	
+        return Mono.just(auth);
     }
 
 }

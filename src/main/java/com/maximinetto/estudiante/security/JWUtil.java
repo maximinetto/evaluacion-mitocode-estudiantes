@@ -1,5 +1,6 @@
 package com.maximinetto.estudiante.security;
 
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class JWUtil {
     
     public Claims getAllClaimsFromToken(String token) {
 	return Jwts.parserBuilder()
-	    .requireAudience(secret)
+	    .setSigningKey(Base64.getEncoder().encodeToString(secret.getBytes()))
 	    .build()
 	    .parseClaimsJws(token)
 	    .getBody();

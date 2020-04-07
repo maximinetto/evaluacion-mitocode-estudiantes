@@ -44,7 +44,6 @@ public class GlobalErrorWebExceptionHandler extends AbstractErrorWebExceptionHan
 
 	System.out.println(errorPropertiesMap);
 	
-	HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 	String status = String.valueOf(errorPropertiesMap.get("status"));
 	
 	final Map<String, Object> mapException = ponerExcepcionesGeneralesEnMap(status, request);

@@ -4,9 +4,11 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import org.springframework.stereotype.Service;
 
 import com.maximinetto.estudiante.commons.GenericServiceImpl;
 import com.maximinetto.estudiante.exceptions.ModelAlreadyExistsException;
+import com.maximinetto.estudiante.model.entity.Rol;
 import com.maximinetto.estudiante.model.entity.Usuario;
 import com.maximinetto.estudiante.model.repository.UsuarioRepository;
 import com.maximinetto.estudiante.model.service.UsuarioService;
@@ -14,6 +16,7 @@ import com.maximinetto.estudiante.security.User;
 
 import reactor.core.publisher.Mono;
 
+@Service
 public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, String> implements UsuarioService{
     
     @Autowired
@@ -24,18 +27,21 @@ public class UsuarioServiceImpl extends GenericServiceImpl<Usuario, String> impl
 
       Mono<Usuario> monoUsuario = repository.findOneByUsuario(usuario);
       
-      return monoUsuario.flatMap( u -> 
-	   Mono.just(
-              new User(
-        	u.getUsuario(), 
-        	u.getClave(), 
-        	u.getEstado(), 
-        	u.getRoles()
-        	 .stream()
-	         .map( r -> r.getNombre())
-	         .collect(Collectors.toList())
-	      )
-           )
+      return monoUsuario.flatMap( u ->{
+	  return Mono.just(
+	              new User(
+	        	u.getUsuario(), 
+	        	u.getClave(), 
+	        	u.getEstado(), 
+	        	u.getRoles()
+	        	 .stream()
+		         .map( r -> r.getNombre())
+		         .collect(Collectors.toList())
+		      )
+	           );
+      }
+      			
+	   
       );            
       
     }
