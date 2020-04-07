@@ -2,15 +2,17 @@ package com.maximinetto.estudiante.exceptions;
 
 import org.springframework.http.HttpStatus;
 
-public class UserNotAuthorized extends GlobalErrorException{
+public class TokenNotValidException extends GlobalErrorException{
+
 
     /**
      * 
      */
     private static final long serialVersionUID = 1L;
-
-    public UserNotAuthorized(String causa) {
-	super("Usuario no authorizado", causa, HttpStatus.UNAUTHORIZED);
+    
+    public TokenNotValidException(String causa) {
+	super("Usuario no autorizado", causa, HttpStatus.UNAUTHORIZED);
     }
+
     
 }

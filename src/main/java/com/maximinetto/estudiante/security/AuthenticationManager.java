@@ -10,6 +10,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import com.maximinetto.estudiante.exceptions.TokenNotValidException;
+
 import io.jsonwebtoken.Claims;
 import reactor.core.publisher.Mono;
 
@@ -32,7 +34,7 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
 	}
 
 	if (usuario == null || !jwtUtil.validateToken(token)) {
-	    return Mono.error(new InterruptedException("Token no válido o ha expirado")); 
+	    return Mono.error(new TokenNotValidException("Token no válido o ha expirado")); 
 	} 
 	
 	Claims claims = jwtUtil.getAllClaimsFromToken(token);
