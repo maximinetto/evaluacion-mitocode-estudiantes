@@ -49,7 +49,6 @@ public class CursoServiceImpl extends GenericServiceImpl<Curso, String> implemen
 		         .switchIfEmpty(Mono.error( 
 		        	 new ModelNotFoundException("No se ha encontrado el curso", "No existe ese id")))
 		         .then(super.save(curso));
-	//super.save(entity);
     }
 
     @Override
